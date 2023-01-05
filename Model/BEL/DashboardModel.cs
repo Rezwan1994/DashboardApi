@@ -14,6 +14,58 @@
 
         public YearlySalesModel YearlySalesModel { get; set; }
     }
+
+    public class MtdGrowthStatusDash
+    {
+        public DateTime REFRESH_DATE { get; set; }
+
+        public double CYM_TARGET_VAL { get; set; }
+
+        public double PYM_IMS_SALES_VAL { get; set; }
+
+        public double CYM_IMS_SALES_VAL { get; set; }
+
+        public double ACH_PCT { get; set; }
+
+        public double GROWTH { get; set; }
+    }
+
+    public class YtdGrowthStatusDash
+    {
+        public DateTime REFRESH_DATE { get; set; }
+
+        public double TARGET_VAL { get; set; }
+
+        public double CY_IMS_SALES_VAL { get; set; }
+
+        public double PY_IMS_SALES_VAL { get; set; }
+
+        public double ACH_PCT { get; set; }
+
+        public double GROWTH { get; set; }
+    }
+    public class AchLiftingMtdModel
+    {
+        public bool status { get; set; }
+
+        public string message { get; set; }
+
+        public MonthlyLiftingStatusDash data { get; set; }
+    }
+    public class MonthlyLiftingStatusDash
+    {
+        public DateTime REFRESH_DATE { get; set; }
+
+        public double Net_Lifting_TARGET_VALUE { get; set; }
+
+        public double CYM_ACTUAL_LIFTING_VALUE { get; set; }
+
+        public double PYM_ACTUAL_LIFTING_VALUE { get; set; }
+
+        public double ACH_PCT { get; set; }
+
+        public double GROWTH { get; set; }
+    }
     public class MonthlySalesModel
     {
         public double SalesValue { get; set; }
@@ -31,7 +83,45 @@
         public double OrderingRetailer { get; set; }
         public string Date { get; set; }
     }
+    public class YearlyLiftingStatusDash
+    {
+        public DateTime REFRESH_DATE { get; set; }
 
+        public double Net_Lifting_TARGET_VALUE { get; set; }
+
+        public double CY_ACTUAL_LIFTING_VALUE { get; set; }
+
+        public double PY_ACTUAL_LIFTING_VALUE { get; set; }
+
+        public double ACH_PCT { get; set; }
+
+        public double GROWTH { get; set; }
+    }
+    public class AchLiftingYtdModel
+    {
+        public bool status { get; set; }
+
+        public string message { get; set; }
+
+        public YearlyLiftingStatusDash data { get; set; }
+    }
+    public class AchBudgetYtdModel
+    {
+        public bool status { get; set; }
+
+        public string message { get; set; }
+
+        public YtdGrowthStatusDash data { get; set; }
+    }
+
+    public class AchBudgetMtdModel
+    {
+        public bool status { get; set; }
+
+        public string message { get; set; }
+
+        public MtdGrowthStatusDash data { get; set; }
+    }
     public class MonthlyDashboardCartModel
     {
         public double TargetValue { get; set; }
@@ -150,7 +240,14 @@
 
         public double DEC_ACH { get; set; }
     }
+    public class TargetVsSalesList
+    {
+        public double TARGET_VAL { get; set; }
 
+        public double IMS_VAL { get; set; }
+
+        public double ACH { get; set; }
+    }
     public class RetailerCount
     {
         public double ScheduledRetailer { get; set; }
@@ -258,5 +355,130 @@
         public double IMS_VAL { get; set; }
 
         public double ACH { get; set; }
+    }
+    public class BrandSalesMtd
+    {
+        public string BRAND_CODE { get; set; }
+
+        public string BRAND_NAME { get; set; }
+
+        public double CY_MTD_TARGET_WEIGHT { get; set; }
+
+        public double CY_MTD_TARGET_VALUE { get; set; }
+
+        public double CY_MTD_WEIGHT { get; set; }
+
+        public double CY_MTD_IMS { get; set; }
+
+        public double LY_MTD_WET { get; set; }
+
+        public double LY_MTD_IMS { get; set; }
+
+        public double ACH { get; set; }
+
+        public double GROWTH { get; set; }
+    }
+    public class BrandSalesYtd
+    {
+        public string BRAND_CODE { get; set; }
+
+        public string BRAND_NAME { get; set; }
+
+        public double CY_YTD_TARGET_WEIGHT { get; set; }
+
+        public double CY_YTD_TARGET_VALUE { get; set; }
+
+        public double CY_YTD_WEIGHT { get; set; }
+
+        public double CY_YTD_IMS { get; set; }
+
+        public double LY_YTD_WET { get; set; }
+
+        public double LY_YTD_IMS { get; set; }
+
+        public double ACH { get; set; }
+
+        public double GROWTH { get; set; }
+    }
+    public class CategorySalesMtd
+    {
+        public string Category_CODE { get; set; }
+
+        public string Category_NAME { get; set; }
+
+        public double CY_MTD_TARGET_WEIGHT { get; set; }
+
+        public double CY_MTD_TARGET_VALUE { get; set; }
+
+        public double CY_MTD_WEIGHT { get; set; }
+
+        public double CY_MTD_IMS { get; set; }
+
+        public double LY_MTD_WET { get; set; }
+
+        public double LY_MTD_IMS { get; set; }
+
+        public double ACH { get; set; }
+
+        public double GROWTH { get; set; }
+    }
+
+    public class CategorySalesYtd
+    {
+        public string Category_CODE { get; set; }
+
+        public string Category_NAME { get; set; }
+
+        public double CY_YTD_TARGET_WEIGHT { get; set; }
+
+        public double CY_YTD_TARGET_VALUE { get; set; }
+
+        public double CY_YTD_WEIGHT { get; set; }
+
+        public double CY_YTD_IMS { get; set; }
+
+        public double LY_YTD_WET { get; set; }
+
+        public double LY_YTD_IMS { get; set; }
+
+        public double ACH { get; set; }
+
+        public double GROWTH { get; set; }
+    }
+    public class NationalSalesMtd
+    {
+        public double CY_MTD_TARGET_WEIGHT { get; set; }
+
+        public double CY_MTD_TARGET_VALUE { get; set; }
+
+        public double CY_MTD_WEIGHT { get; set; }
+
+        public double CY_MTD_IMS { get; set; }
+
+        public double LY_MTD_WET { get; set; }
+
+        public double LY_MTD_IMS { get; set; }
+
+        public double ACH { get; set; }
+
+        public double GROWTH { get; set; }
+    }
+    public class NationalSalesYtd
+    {
+        public double CY_YTD_TARGET_WEIGHT { get; set; }
+
+        public double CY_YTD_TARGET_VALUE { get; set; }
+
+        public double CY_YTD_WEIGHT { get; set; }
+
+        public double CY_YTD_IMS { get; set; }
+
+        public double LY_YTD_WET { get; set; }
+
+        public double LY_YTD_IMS { get; set; }
+
+        public double ACH { get; set; }
+
+        public double GROWTH { get; set; }
     }
 }

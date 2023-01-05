@@ -69,3 +69,8 @@ E:\DashboardAPI\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.dll
 E:\DashboardAPI\bin\Debug\net6.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 E:\DashboardAPI\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
 E:\DashboardAPI\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
+E:\DashboardApi\obj\Debug\net6.0\staticwebassets\msbuild.DashboardAPI.Microsoft.AspNetCore.StaticWebAssets.props
+E:\DashboardApi\obj\Debug\net6.0\staticwebassets\msbuild.build.DashboardAPI.props
+E:\DashboardApi\obj\Debug\net6.0\staticwebassets\msbuild.buildMultiTargeting.DashboardAPI.props
+E:\DashboardApi\obj\Debug\net6.0\staticwebassets\msbuild.buildTransitive.DashboardAPI.props
+E:\DashboardApi\obj\Debug\net6.0\staticwebassets.pack.json

@@ -1,10 +1,20 @@
-﻿using DashboardAPI.Getway;
-using DashboardAPI.Model.BEL;
+﻿// Decompiled with JetBrains decompiler
+// Type: DashboardAPI.Model.DAL.masterDashboardDal
+// Assembly: DashboardAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: D6304A5F-607C-40EF-B4AA-478DAE5D9B02
+// Assembly location: E:\DashboardCoreApi\DashboardAPI.dll
 
+using DashboardAPI.Getway;
+using DashboardAPI.Model.BEL;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
+
+#nullable enable
 namespace DashboardAPI.Model.DAL
 {
     public class masterDashboardDal : ReturnData
@@ -12,60 +22,54 @@ namespace DashboardAPI.Model.DAL
         private readonly DBHelper _dbHelper = new DBHelper();
         private readonly ErrorLogger _errorLogger = new ErrorLogger();
         private static readonly DBConnection DBConnection = new DBConnection();
-        public readonly string ConnString = DBConnection.SAConnStrReader("Oracle", "PHARMAERP");
-
+        public readonly string ConnString = masterDashboardDal.DBConnection.SAConnStrReader("Oracle", "PHARMAERP");
 
         public TodayDashboardCartModel GetTodayCartValue(int UserId)
         {
-            DataTable dataTable = this._dbHelper.GetDataTable(string.Format(@"select fnc_today_order_val({0}) OrderValue,
-            fnc_today_sales_val({0}) SalesValue, fnc_today_sched_retailer({0}) ScheduledRetailer,
-            fnc_today_ordering_retailer({0}) OrderingRetailer, fnc_total_retailer({0}) TotalRetailer from dual", (object)UserId));
-        
-            TodayDashboardCartModel todayModel = new TodayDashboardCartModel();
-            return dataTable.Rows.Cast<DataRow>().Select<DataRow, TodayDashboardCartModel>((Func<DataRow, TodayDashboardCartModel>)(row => new TodayDashboardCartModel()
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select fnc_today_order_val({0}) OrderValue,\r\n            fnc_today_sales_val({0}) SalesValue, fnc_today_sched_retailer({0}) ScheduledRetailer,\r\n            fnc_today_ordering_retailer({0}) OrderingRetailer, fnc_total_retailer({0}) TotalRetailer from dual", (object)UserId));
+            TodayDashboardCartModel dashboardCartModel = new TodayDashboardCartModel();
+            return dataTable.Rows.Cast<DataRow>().Select<DataRow, TodayDashboardCartModel>((Func<DataRow, TodayDashboardCartModel>)(row =>
             {
-                OrderValue = row["ORDERVALUE"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ORDERVALUE"].ToString()), 2) : 0.0,
-                SalesValue = row["SalesValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["SalesValue"].ToString()), 2) : 0.0,
-                OrderingRetailer = row["OrderingRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["OrderingRetailer"].ToString()), 2) : 0.0,
-                ScheduledRetailer = row["ScheduledRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ScheduledRetailer"].ToString()), 2) : 0.0,
-                TotalRetailer = row["TotalRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TotalRetailer"].ToString()), 2) : 0.0,
-                Date = DateTime.Now.Date.ToString("dd-MM-yyyy")
+                TodayDashboardCartModel todayCartValue = new TodayDashboardCartModel();
+                todayCartValue.OrderValue = row["ORDERVALUE"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ORDERVALUE"].ToString()), 2) : 0.0;
+                todayCartValue.SalesValue = row["SalesValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["SalesValue"].ToString()), 2) : 0.0;
+                todayCartValue.OrderingRetailer = row["OrderingRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["OrderingRetailer"].ToString()), 2) : 0.0;
+                todayCartValue.ScheduledRetailer = row["ScheduledRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ScheduledRetailer"].ToString()), 2) : 0.0;
+                todayCartValue.TotalRetailer = row["TotalRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TotalRetailer"].ToString()), 2) : 0.0;
+                DateTime dateTime = DateTime.Now;
+                dateTime = dateTime.Date;
+                todayCartValue.Date = dateTime.ToString("dd-MM-yyyy");
+                return todayCartValue;
             })).ToList<TodayDashboardCartModel>().FirstOrDefault<TodayDashboardCartModel>();
         }
-        public MonthlyDashboardCartModel GetMonthlyCartValue(int UserId)
+
+        public MonthlyDashboardCartModel GetMonthlyCartValue(int UserId) => this._dbHelper.GetDataTable(string.Format("select FNC_MTD_TARGET_VAL(1) TargetValue,\r\n            FNC_MTD_IMS_VAL(1) SalesValue,FNC_MTD_RETURN_VAL(1) ReturnValue,\r\n            FNC_MTD_ACH_VAL(1) AchValue,FNC_MTD_GROWTH(1) GrowthValue from dual", (object)UserId)).Rows.Cast<DataRow>().Select<DataRow, MonthlyDashboardCartModel>((Func<DataRow, MonthlyDashboardCartModel>)(row =>
         {
-            DataTable dataTable = this._dbHelper.GetDataTable(string.Format(@"select FNC_MTD_TARGET_VAL(1) TargetValue,
-            FNC_MTD_IMS_VAL(1) SalesValue,FNC_MTD_RETURN_VAL(1) ReturnValue,
-            FNC_MTD_ACH_VAL(1) AchValue,FNC_MTD_GROWTH(1) GrowthValue from dual", (object)UserId));
-            
-            return dataTable.Rows.Cast<DataRow>().Select<DataRow, MonthlyDashboardCartModel>((Func<DataRow, MonthlyDashboardCartModel>)(row => new MonthlyDashboardCartModel()
-            {
-                TargetValue = row["TargetValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TargetValue"].ToString()), 2) : 0.0,
-                SalesValue = row["SalesValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["SalesValue"].ToString()), 2) : 0.0,
-                 AchValue = row["AchValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["AchValue"].ToString()), 2) : 0.0,
-                GrowthValue = row["GrowthValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["GrowthValue"].ToString()), 2) : 0.0,
-                ReturnValue = row["ReturnValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ReturnValue"].ToString()), 2) : 0.0,
-                Month = DateTime.Now.Date.ToString("MMM")
-            })).ToList<MonthlyDashboardCartModel>().FirstOrDefault<MonthlyDashboardCartModel>();
+            MonthlyDashboardCartModel monthlyCartValue = new MonthlyDashboardCartModel();
+            monthlyCartValue.TargetValue = row["TargetValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TargetValue"].ToString()), 2) : 0.0;
+            monthlyCartValue.SalesValue = row["SalesValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["SalesValue"].ToString()), 2) : 0.0;
+            monthlyCartValue.AchValue = row["AchValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["AchValue"].ToString()), 2) : 0.0;
+            monthlyCartValue.GrowthValue = row["GrowthValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["GrowthValue"].ToString()), 2) : 0.0;
+            monthlyCartValue.ReturnValue = row["ReturnValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ReturnValue"].ToString()), 2) : 0.0;
+            DateTime dateTime = DateTime.Now;
+            dateTime = dateTime.Date;
+            monthlyCartValue.Month = dateTime.ToString("MMMM");
+            return monthlyCartValue;
+        })).ToList<MonthlyDashboardCartModel>().FirstOrDefault<MonthlyDashboardCartModel>();
 
-        }
-        public MonthlyDashboardCartModel GetYearlyCartValue(int UserId)
+        public MonthlyDashboardCartModel GetYearlyCartValue(int UserId) => this._dbHelper.GetDataTable(string.Format("select FNC_YTD_TARGET_VAL(1) TargetValue,\r\n            FNC_YTD_IMS_VAL(1) SalesValue,FNC_YTD_RETURN_VAL(1) ReturnValue,\r\n            FNC_YTD_ACH_VAL(1) AchValue,FNC_YTD_GROWTH(1) GrowthValue from dual", (object)UserId)).Rows.Cast<DataRow>().Select<DataRow, MonthlyDashboardCartModel>((Func<DataRow, MonthlyDashboardCartModel>)(row =>
         {
-            DataTable dataTable = this._dbHelper.GetDataTable(string.Format(@"select FNC_YTD_TARGET_VAL(1) TargetValue,
-            FNC_YTD_IMS_VAL(1) SalesValue,FNC_YTD_RETURN_VAL(1) ReturnValue,
-            FNC_YTD_ACH_VAL(1) AchValue,FNC_YTD_GROWTH(1) GrowthValue from dual", (object)UserId));
-
-            return dataTable.Rows.Cast<DataRow>().Select<DataRow, MonthlyDashboardCartModel>((Func<DataRow, MonthlyDashboardCartModel>)(row => new MonthlyDashboardCartModel()
-            {
-                TargetValue = row["TargetValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TargetValue"].ToString()), 2) : 0.0,
-                SalesValue = row["SalesValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["SalesValue"].ToString()), 2) : 0.0,
-                AchValue = row["AchValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["AchValue"].ToString()), 2) : 0.0,
-                GrowthValue = row["GrowthValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["GrowthValue"].ToString()), 2) : 0.0,
-                ReturnValue = row["ReturnValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ReturnValue"].ToString()), 2) : 0.0,
-                Month = DateTime.Now.Date.ToString("MMM")
-            })).ToList<MonthlyDashboardCartModel>().FirstOrDefault<MonthlyDashboardCartModel>();
-
-        }
+            MonthlyDashboardCartModel yearlyCartValue = new MonthlyDashboardCartModel();
+            yearlyCartValue.TargetValue = row["TargetValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TargetValue"].ToString()), 2) : 0.0;
+            yearlyCartValue.SalesValue = row["SalesValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["SalesValue"].ToString()), 2) : 0.0;
+            yearlyCartValue.AchValue = row["AchValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["AchValue"].ToString()), 2) : 0.0;
+            yearlyCartValue.GrowthValue = row["GrowthValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["GrowthValue"].ToString()), 2) : 0.0;
+            yearlyCartValue.ReturnValue = row["ReturnValue"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ReturnValue"].ToString()), 2) : 0.0;
+            DateTime dateTime = DateTime.Now;
+            dateTime = dateTime.Date;
+            yearlyCartValue.Month = dateTime.ToString("MMMM");
+            return yearlyCartValue;
+        })).ToList<MonthlyDashboardCartModel>().FirstOrDefault<MonthlyDashboardCartModel>();
 
         public OrderModel GetOrderCount(int UserId)
         {
@@ -76,6 +80,7 @@ namespace DashboardAPI.Model.DAL
                 OrderValue = row["ORDERVALUE"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ORDERVALUE"].ToString()) / 10000000.0, 2) : 0.0
             })).ToList<OrderModel>().FirstOrDefault<OrderModel>();
         }
+
         public MonthlyTargetModel GetMonthlyTargetCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_MTD_TARGET_VAL({0}) TargetValue FROM DUAL", (object)UserId));
@@ -129,25 +134,27 @@ namespace DashboardAPI.Model.DAL
         public RetailerCount GetScheduledRetailerCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT fnc_today_sched_retailer({0}) ScheduledRetailer FROM DUAL", (object)UserId));
-            RetailerCount rtailerModel = new RetailerCount();
+            RetailerCount retailerCount = new RetailerCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, RetailerCount>((Func<DataRow, RetailerCount>)(row => new RetailerCount()
             {
                 ScheduledRetailer = row["ScheduledRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ScheduledRetailer"].ToString()), 2) : 0.0
             })).ToList<RetailerCount>().FirstOrDefault<RetailerCount>();
         }
+
         public RetailerCount GetTotalRetailerCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT fnc_total_retailer({0}) TotalRetailer FROM DUAL", (object)UserId));
-            RetailerCount rtailerModel = new RetailerCount();
+            RetailerCount retailerCount = new RetailerCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, RetailerCount>((Func<DataRow, RetailerCount>)(row => new RetailerCount()
             {
                 TotalRetailer = row["TotalRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TotalRetailer"].ToString()), 2) : 0.0
             })).ToList<RetailerCount>().FirstOrDefault<RetailerCount>();
         }
+
         public RetailerCount GetOrderingRetailerCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT fnc_today_ordering_retailer({0}) OrderingRetailer FROM DUAL", (object)UserId));
-            RetailerCount rtailerModel = new RetailerCount();
+            RetailerCount retailerCount = new RetailerCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, RetailerCount>((Func<DataRow, RetailerCount>)(row => new RetailerCount()
             {
                 OrderingRetailer = row["OrderingRetailer"].ToString() != "" ? Math.Round(Convert.ToDouble(row["OrderingRetailer"].ToString()), 2) : 0.0
@@ -157,58 +164,57 @@ namespace DashboardAPI.Model.DAL
         public ReturnACHGrowthCount GetMTDReturnCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_MTD_RETURN_VAL({0}) ReturnedCount FROM DUAL", (object)UserId));
-            ReturnACHGrowthCount countModel = new ReturnACHGrowthCount();
+            ReturnACHGrowthCount returnAchGrowthCount = new ReturnACHGrowthCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, ReturnACHGrowthCount>((Func<DataRow, ReturnACHGrowthCount>)(row => new ReturnACHGrowthCount()
             {
-                ReturnedCount = row["ReturnedCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ReturnedCount"].ToString()) / 10000000, 2) : 0.0
+                ReturnedCount = row["ReturnedCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ReturnedCount"].ToString()) / 10000000.0, 2) : 0.0
             })).ToList<ReturnACHGrowthCount>().FirstOrDefault<ReturnACHGrowthCount>();
         }
+
         public ReturnACHGrowthCount GetMTDACHCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_MTD_ACH_VAL({0}) ACHCount FROM DUAL", (object)UserId));
-            ReturnACHGrowthCount countModel = new ReturnACHGrowthCount();
+            ReturnACHGrowthCount returnAchGrowthCount = new ReturnACHGrowthCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, ReturnACHGrowthCount>((Func<DataRow, ReturnACHGrowthCount>)(row => new ReturnACHGrowthCount()
             {
                 ACHCount = row["ACHCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ACHCount"].ToString()), 2) : 0.0
             })).ToList<ReturnACHGrowthCount>().FirstOrDefault<ReturnACHGrowthCount>();
         }
+
         public ReturnACHGrowthCount GetMTDGrowthCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_MTD_GROWTH({0}) GrowthCount FROM DUAL", (object)UserId));
-            ReturnACHGrowthCount countModel = new ReturnACHGrowthCount();
+            ReturnACHGrowthCount returnAchGrowthCount = new ReturnACHGrowthCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, ReturnACHGrowthCount>((Func<DataRow, ReturnACHGrowthCount>)(row => new ReturnACHGrowthCount()
             {
                 GrowthCount = row["GrowthCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["GrowthCount"].ToString()), 2) : 0.0
             })).ToList<ReturnACHGrowthCount>().FirstOrDefault<ReturnACHGrowthCount>();
         }
+
         public ReturnACHGrowthCount GetYTDGrowthCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_YTD_GROWTH({0}) GrowthCount FROM DUAL", (object)UserId));
-            ReturnACHGrowthCount countModel = new ReturnACHGrowthCount();
+            ReturnACHGrowthCount returnAchGrowthCount = new ReturnACHGrowthCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, ReturnACHGrowthCount>((Func<DataRow, ReturnACHGrowthCount>)(row => new ReturnACHGrowthCount()
             {
                 GrowthCount = row["GrowthCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["GrowthCount"].ToString()), 2) : 0.0
             })).ToList<ReturnACHGrowthCount>().FirstOrDefault<ReturnACHGrowthCount>();
         }
+
         public ReturnACHGrowthCount GetYTDReturnCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_YTD_RETURN_VAL({0}) ReturnedCount FROM DUAL", (object)UserId));
-            ReturnACHGrowthCount countModel = new ReturnACHGrowthCount();
+            ReturnACHGrowthCount returnAchGrowthCount = new ReturnACHGrowthCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, ReturnACHGrowthCount>((Func<DataRow, ReturnACHGrowthCount>)(row => new ReturnACHGrowthCount()
             {
-                ReturnedCount = row["ReturnedCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ReturnedCount"].ToString()) / 10000000, 2) : 0.0
+                ReturnedCount = row["ReturnedCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ReturnedCount"].ToString()) / 10000000.0, 2) : 0.0
             })).ToList<ReturnACHGrowthCount>().FirstOrDefault<ReturnACHGrowthCount>();
         }
 
-
-
         public PC_LPCCount GetTodayPCCount(int UserId)
         {
-            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_TODAY_PC({0}) TodayPCCount,FNC_MTD_PC({0}) MonthlyPCCount" +
-                ",FNC_YTD_PC({0}) YearlyPCCount,FNC_TODAY_LPC({0}) TodayLPCCount,FNC_MTD_LPC({0}) MonthlyLPCCount," +
-                " FNC_YTD_LPC({0}) YearlyLPCCount" +
-                " FROM DUAL", (object)UserId));
-            PC_LPCCount countModel = new PC_LPCCount();
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_TODAY_PC({0}) TodayPCCount,FNC_MTD_PC({0}) MonthlyPCCount,FNC_YTD_PC({0}) YearlyPCCount,FNC_TODAY_LPC({0}) TodayLPCCount,FNC_MTD_LPC({0}) MonthlyLPCCount, FNC_YTD_LPC({0}) YearlyLPCCount FROM DUAL", (object)UserId));
+            PC_LPCCount pcLpcCount = new PC_LPCCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, PC_LPCCount>((Func<DataRow, PC_LPCCount>)(row => new PC_LPCCount()
             {
                 TodayPCCount = row["TodayPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TodayPCCount"].ToString()), 2) : 0.0,
@@ -216,22 +222,24 @@ namespace DashboardAPI.Model.DAL
                 YearlyPCCount = row["YearlyPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["YearlyPCCount"].ToString()), 2) : 0.0,
                 TodayLPCCount = row["TodayLPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TodayLPCCount"].ToString()), 2) : 0.0,
                 MonthlyLPCCount = row["MonthlyLPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["MonthlyLPCCount"].ToString()), 2) : 0.0,
-                YearlyLPCCount = row["YearlyLPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["YearlyLPCCount"].ToString()), 2) : 0.0,
+                YearlyLPCCount = row["YearlyLPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["YearlyLPCCount"].ToString()), 2) : 0.0
             })).ToList<PC_LPCCount>().FirstOrDefault<PC_LPCCount>();
         }
+
         public PC_LPCCount GetMonthlyPCCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_MTD_PC({0}) MonthlyPCCount FROM DUAL", (object)UserId));
-            PC_LPCCount countModel = new PC_LPCCount();
+            PC_LPCCount pcLpcCount = new PC_LPCCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, PC_LPCCount>((Func<DataRow, PC_LPCCount>)(row => new PC_LPCCount()
             {
                 MonthlyPCCount = row["MonthlyPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["MonthlyPCCount"].ToString()), 2) : 0.0
             })).ToList<PC_LPCCount>().FirstOrDefault<PC_LPCCount>();
         }
+
         public PC_LPCCount GetYearlyPCCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_YTD_PC({0}) YearlyPCCount FROM DUAL", (object)UserId));
-            PC_LPCCount countModel = new PC_LPCCount();
+            PC_LPCCount pcLpcCount = new PC_LPCCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, PC_LPCCount>((Func<DataRow, PC_LPCCount>)(row => new PC_LPCCount()
             {
                 YearlyPCCount = row["YearlyPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["YearlyPCCount"].ToString()), 2) : 0.0
@@ -241,34 +249,37 @@ namespace DashboardAPI.Model.DAL
         public PC_LPCCount GetYearlyLPCCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_YTD_LPC({0}) YearlyLPCCount FROM DUAL", (object)UserId));
-            PC_LPCCount countModel = new PC_LPCCount();
+            PC_LPCCount pcLpcCount = new PC_LPCCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, PC_LPCCount>((Func<DataRow, PC_LPCCount>)(row => new PC_LPCCount()
             {
                 YearlyPCCount = row["YearlyLPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["YearlyLPCCount"].ToString()), 2) : 0.0
             })).ToList<PC_LPCCount>().FirstOrDefault<PC_LPCCount>();
         }
+
         public PC_LPCCount GetMonthlyLPCCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_MTD_LPC({0}) MonthlyLPCCount FROM DUAL", (object)UserId));
-            PC_LPCCount countModel = new PC_LPCCount();
+            PC_LPCCount pcLpcCount = new PC_LPCCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, PC_LPCCount>((Func<DataRow, PC_LPCCount>)(row => new PC_LPCCount()
             {
                 MonthlyPCCount = row["MonthlyLPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["MonthlyLPCCount"].ToString()), 2) : 0.0
             })).ToList<PC_LPCCount>().FirstOrDefault<PC_LPCCount>();
         }
+
         public PC_LPCCount GetTodayLPCCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_TODAY_LPC({0}) TodayLPCCount FROM DUAL", (object)UserId));
-            PC_LPCCount countModel = new PC_LPCCount();
+            PC_LPCCount pcLpcCount = new PC_LPCCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, PC_LPCCount>((Func<DataRow, PC_LPCCount>)(row => new PC_LPCCount()
             {
                 TodayPCCount = row["TodayLPCCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["TodayLPCCount"].ToString()), 2) : 0.0
             })).ToList<PC_LPCCount>().FirstOrDefault<PC_LPCCount>();
         }
+
         public ReturnACHGrowthCount GetYTDACHCount(int UserId)
         {
             DataTable dataTable = this._dbHelper.GetDataTable(string.Format("SELECT FNC_YTD_ACH_VAL({0}) ACHCount FROM DUAL", (object)UserId));
-            ReturnACHGrowthCount countModel = new ReturnACHGrowthCount();
+            ReturnACHGrowthCount returnAchGrowthCount = new ReturnACHGrowthCount();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, ReturnACHGrowthCount>((Func<DataRow, ReturnACHGrowthCount>)(row => new ReturnACHGrowthCount()
             {
                 ACHCount = row["ACHCount"].ToString() != "" ? Math.Round(Convert.ToDouble(row["ACHCount"].ToString()), 2) : 0.0
@@ -277,46 +288,27 @@ namespace DashboardAPI.Model.DAL
 
         public DayWiseModel GetIMSReturnPct(int UserId)
         {
-            DayWiseModel dayWiseModel = new DayWiseModel();
+            DayWiseModel imsReturnPct = new DayWiseModel();
             try
             {
                 using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
                 {
-                    using (OracleCommand oracleCommand = new OracleCommand())
+                    using (new OracleCommand())
                     {
-                        string anonymous_block = "begin " +
-                            "  :refcursor1 := FN_DAY_WISE_RETURN_PCT(" + UserId + ") ;" +
-                            "end;";
-                        //fill in your function and variables via the above example
-                        OracleCommand sqlCom = oracleConnection.CreateCommand();
-                        sqlCom.CommandText = anonymous_block;
-
-                        // Bind 
-                        sqlCom.Parameters.Add("refcursor1", OracleDbType.RefCursor);
-                        sqlCom.Parameters[0].Direction = ParameterDirection.ReturnValue;
-
-
+                        string str = "begin   :refcursor1 := FN_DAY_WISE_RETURN_PCT(" + UserId.ToString() + ") ;end;";
+                        OracleCommand command = oracleConnection.CreateCommand();
+                        command.CommandText = str;
+                        command.Parameters.Add("refcursor1", OracleDbType.RefCursor);
+                        command.Parameters[0].Direction = ParameterDirection.ReturnValue;
                         try
                         {
-                            // Execute command; Have the parameters populated
                             oracleConnection.Open();
-                            sqlCom.ExecuteNonQuery();
-
-
+                            command.ExecuteNonQuery();
                             DataTable dataTable = new DataTable();
-
-
-                            OracleDataAdapter da = new OracleDataAdapter(sqlCom);
-
-                            // Populate a DataSet with refcursor1.
-                            DataSet ds = new DataSet();
-                            da.Fill(ds, "refcursor1", (OracleRefCursor)(sqlCom.Parameters["refcursor1"].Value));
-                            dataTable = ds.Tables["refcursor1"];
-                            // Print out the field count the REF Cursor
-
-
-
-                            dayWiseModel= dataTable.Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
+                            OracleDataAdapter oracleDataAdapter = new OracleDataAdapter(command);
+                            DataSet dataSet = new DataSet();
+                            oracleDataAdapter.Fill(dataSet, "refcursor1", (OracleRefCursor)command.Parameters["refcursor1"].Value);
+                            imsReturnPct = dataSet.Tables["refcursor1"].Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
                             {
                                 YYYYMMMM = Convert.ToInt32(row["YYYYMM"].ToString()),
                                 DAY_01 = Math.Round(Convert.ToDouble(row["DAY_01"].ToString()), 2),
@@ -350,12 +342,11 @@ namespace DashboardAPI.Model.DAL
                                 DAY_29 = Math.Round(Convert.ToDouble(row["DAY_29"].ToString()), 2),
                                 DAY_30 = Math.Round(Convert.ToDouble(row["DAY_30"].ToString()), 2),
                                 DAY_31 = Math.Round(Convert.ToDouble(row["DAY_31"].ToString()), 2)
-                            })).ToList<DayWiseModel>().FirstOrDefault();
-
+                            })).ToList<DayWiseModel>().FirstOrDefault<DayWiseModel>();
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("Error: {0}", e.Message);
+                            Console.WriteLine("Error: {0}", (object)ex.Message);
                         }
                     }
                 }
@@ -365,48 +356,32 @@ namespace DashboardAPI.Model.DAL
                 Console.WriteLine((object)ex);
                 return new DayWiseModel();
             }
-            return dayWiseModel;
+            return imsReturnPct;
         }
+
         public DayWiseModel GetPCTrend(int UserId, string Year)
         {
-            DayWiseModel dayWiseModel = new DayWiseModel();
+            DayWiseModel pcTrend = new DayWiseModel();
             try
             {
                 using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
                 {
-                    using (OracleCommand oracleCommand = new OracleCommand())
+                    using (new OracleCommand())
                     {
-                        string anonymous_block = String.Format(@"begin   :refcursor1 := FN_DAY_WISE_PC({0},'{1}'); 
-                          end;", UserId, Year);
-                        //fill in your function and variables via the above example
-                        OracleCommand sqlCom = oracleConnection.CreateCommand();
-                        sqlCom.CommandText = anonymous_block;
-
-                        // Bind 
-                        sqlCom.Parameters.Add("refcursor1", OracleDbType.RefCursor);
-                        sqlCom.Parameters[0].Direction = ParameterDirection.ReturnValue;
-
+                        string str = string.Format("begin   :refcursor1 := FN_DAY_WISE_PC({0},'{1}'); \r\n                          end;", (object)UserId, (object)Year);
+                        OracleCommand command = oracleConnection.CreateCommand();
+                        command.CommandText = str;
+                        command.Parameters.Add("refcursor1", OracleDbType.RefCursor);
+                        command.Parameters[0].Direction = ParameterDirection.ReturnValue;
                         try
                         {
-                            // Execute command; Have the parameters populated
                             oracleConnection.Open();
-                            sqlCom.ExecuteNonQuery();
-
-
+                            command.ExecuteNonQuery();
                             DataTable dataTable = new DataTable();
-
-
-                            OracleDataAdapter da = new OracleDataAdapter(sqlCom);
-
-                            // Populate a DataSet with refcursor1.
-                            DataSet ds = new DataSet();
-                            da.Fill(ds, "refcursor1", (OracleRefCursor)(sqlCom.Parameters["refcursor1"].Value));
-                            dataTable = ds.Tables["refcursor1"];
-                            // Print out the field count the REF Cursor
-
-
-
-                            dayWiseModel = dataTable.Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
+                            OracleDataAdapter oracleDataAdapter = new OracleDataAdapter(command);
+                            DataSet dataSet = new DataSet();
+                            oracleDataAdapter.Fill(dataSet, "refcursor1", (OracleRefCursor)command.Parameters["refcursor1"].Value);
+                            pcTrend = dataSet.Tables["refcursor1"].Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
                             {
                                 YYYYMMMM = Convert.ToInt32(row["YYYYMM"].ToString()),
                                 DAY_01 = Math.Round(Convert.ToDouble(row["DAY_01"].ToString()), 2),
@@ -440,12 +415,11 @@ namespace DashboardAPI.Model.DAL
                                 DAY_29 = Math.Round(Convert.ToDouble(row["DAY_29"].ToString()), 2),
                                 DAY_30 = Math.Round(Convert.ToDouble(row["DAY_30"].ToString()), 2),
                                 DAY_31 = Math.Round(Convert.ToDouble(row["DAY_31"].ToString()), 2)
-                            })).ToList<DayWiseModel>().FirstOrDefault();
-
+                            })).ToList<DayWiseModel>().FirstOrDefault<DayWiseModel>();
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("Error: {0}", e.Message);
+                            Console.WriteLine("Error: {0}", (object)ex.Message);
                         }
                     }
                 }
@@ -455,250 +429,32 @@ namespace DashboardAPI.Model.DAL
                 Console.WriteLine((object)ex);
                 return new DayWiseModel();
             }
-            return dayWiseModel;
+            return pcTrend;
         }
 
-        public List<DayWiseModel> GetPhysicalAndTransitStockList(
-  int UserId,
-  string Year)
+        public List<DayWiseModel> GetPhysicalAndTransitStockList(int UserId, string Year)
         {
-            List<DayWiseModel> dayWiseModelList = new List<DayWiseModel>();
+            List<DayWiseModel> transitStockList = new List<DayWiseModel>();
             try
             {
                 using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
                 {
-                    using (OracleCommand oracleCommand = new OracleCommand())
+                    using (new OracleCommand())
                     {
-                        string anonymous_block = String.Format(@"begin   :refcursor1 := FN_DATE_WISE_STOCK_VALUE({0},'{1}'); 
-                          end;", UserId, Year);
-                        //fill in your function and variables via the above example
-                        OracleCommand sqlCom = oracleConnection.CreateCommand();
-                        sqlCom.CommandText = anonymous_block;
-
-                        // Bind 
-                        sqlCom.Parameters.Add("refcursor1", OracleDbType.RefCursor);
-                        sqlCom.Parameters[0].Direction = ParameterDirection.ReturnValue;
+                        string str = string.Format("begin   :refcursor1 := FN_DATE_WISE_STOCK_VALUE({0},'{1}'); \r\n                          end;", (object)UserId, (object)Year);
+                        OracleCommand command = oracleConnection.CreateCommand();
+                        command.CommandText = str;
+                        command.Parameters.Add("refcursor1", OracleDbType.RefCursor);
+                        command.Parameters[0].Direction = ParameterDirection.ReturnValue;
                         try
                         {
-                            // Execute command; Have the parameters populated
                             oracleConnection.Open();
-                            sqlCom.ExecuteNonQuery();
-
-
+                            command.ExecuteNonQuery();
                             DataTable dataTable = new DataTable();
-
-
-                            OracleDataAdapter da = new OracleDataAdapter(sqlCom);
-
-                            // Populate a DataSet with refcursor1.
-                            DataSet ds = new DataSet();
-                            da.Fill(ds, "refcursor1", (OracleRefCursor)(sqlCom.Parameters["refcursor1"].Value));
-                            dataTable = ds.Tables["refcursor1"];
-                            // Print out the field count the REF Cursor
-
-
-
-                            dayWiseModelList = dataTable.Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
-                            {
-                                YYYYMMMM = Convert.ToInt32(row["YYYYMM"].ToString()),
-                                DAY_01 = Math.Round(Convert.ToDouble(row["DAY_01"].ToString()), 2),
-                                DAY_02 = Math.Round(Convert.ToDouble(row["DAY_02"].ToString()), 2),
-                                DAY_03 = Math.Round(Convert.ToDouble(row["DAY_03"].ToString()), 2),
-                                DAY_04 = Math.Round(Convert.ToDouble(row["DAY_04"].ToString()), 2),
-                                DAY_05 = Math.Round(Convert.ToDouble(row["DAY_05"].ToString()), 2),
-                                DAY_06 = Math.Round(Convert.ToDouble(row["DAY_06"].ToString()), 2),
-                                DAY_07 = Math.Round(Convert.ToDouble(row["DAY_07"].ToString()), 2),
-                                DAY_08 = Math.Round(Convert.ToDouble(row["DAY_08"].ToString()), 2),
-                                DAY_09 = Math.Round(Convert.ToDouble(row["DAY_09"].ToString()), 2),
-                                DAY_10 = Math.Round(Convert.ToDouble(row["DAY_10"].ToString()), 2),
-                                DAY_11 = Math.Round(Convert.ToDouble(row["DAY_11"].ToString()), 2),
-                                DAY_12 = Math.Round(Convert.ToDouble(row["DAY_12"].ToString()), 2),
-                                DAY_13 = Math.Round(Convert.ToDouble(row["DAY_13"].ToString()), 2),
-                                DAY_14 = Math.Round(Convert.ToDouble(row["DAY_14"].ToString()), 2),
-                                DAY_15 = Math.Round(Convert.ToDouble(row["DAY_15"].ToString()), 2),
-                                DAY_16 = Math.Round(Convert.ToDouble(row["DAY_16"].ToString()), 2),
-                                DAY_17 = Math.Round(Convert.ToDouble(row["DAY_17"].ToString()), 2),
-                                DAY_18 = Math.Round(Convert.ToDouble(row["DAY_18"].ToString()), 2),
-                                DAY_19 = Math.Round(Convert.ToDouble(row["DAY_19"].ToString()), 2),
-                                DAY_20 = Math.Round(Convert.ToDouble(row["DAY_20"].ToString()), 2),
-                                DAY_21 = Math.Round(Convert.ToDouble(row["DAY_21"].ToString()), 2),
-                                DAY_22 = Math.Round(Convert.ToDouble(row["DAY_22"].ToString()), 2),
-                                DAY_23 = Math.Round(Convert.ToDouble(row["DAY_23"].ToString()), 2),
-                                DAY_24 = Math.Round(Convert.ToDouble(row["DAY_24"].ToString()), 2),
-                                DAY_25 = Math.Round(Convert.ToDouble(row["DAY_25"].ToString()), 2),
-                                DAY_26 = Math.Round(Convert.ToDouble(row["DAY_26"].ToString()), 2),
-                                DAY_27 = Math.Round(Convert.ToDouble(row["DAY_27"].ToString()), 2),
-                                DAY_28 = Math.Round(Convert.ToDouble(row["DAY_28"].ToString()), 2),
-                                DAY_29 = Math.Round(Convert.ToDouble(row["DAY_29"].ToString()), 2),
-                                DAY_30 = Math.Round(Convert.ToDouble(row["DAY_30"].ToString()), 2),
-                                DAY_31 = Math.Round(Convert.ToDouble(row["DAY_31"].ToString()), 2)
-                            })).ToList<DayWiseModel>();
-
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Error: {0}", e.Message);
-                        }
-
-                      
-                    }
-                }
-                return dayWiseModelList;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine((object)ex);
-                return new List<DayWiseModel>();
-            }
-        }
-        public List<DayWiseModel> GetIMSVolumeList(int UserId)
-        {
-            List<DayWiseModel> dayWiseModelList = new List<DayWiseModel>();
-            try
-            {
-                using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
-                {
-                    using (OracleCommand oracleCommand = new OracleCommand())
-                    {
-
-                        string anonymous_block = "begin " +
-                            "  :refcursor1 := FN_NATIONAL_DAY_WISE_IMS_VOL(" + UserId + ") ;" +
-                            "end;";
-                        //fill in your function and variables via the above example
-                        OracleCommand sqlCom = oracleConnection.CreateCommand();
-                        sqlCom.CommandText = anonymous_block;
-
-                        // Bind 
-                        sqlCom.Parameters.Add("refcursor1", OracleDbType.RefCursor);
-                        sqlCom.Parameters[0].Direction = ParameterDirection.ReturnValue;
-
-
-                        try
-                        {
-                            // Execute command; Have the parameters populated
-                            oracleConnection.Open();
-                            sqlCom.ExecuteNonQuery();
-
-
-                            DataTable dataTable = new DataTable();
-
-
-                            OracleDataAdapter da = new OracleDataAdapter(sqlCom);
-
-                            // Populate a DataSet with refcursor1.
-                            DataSet ds = new DataSet();
-                            da.Fill(ds, "refcursor1", (OracleRefCursor)(sqlCom.Parameters["refcursor1"].Value));
-                            dataTable = ds.Tables["refcursor1"];
-                            // Print out the field count the REF Cursor
-
-
-
-                            dayWiseModelList = dataTable.Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
-                            {
-                                YYYYMMMM = Convert.ToInt32(row["YYYYMM"].ToString()),
-                                DAY_01 = Math.Round(Convert.ToDouble(row["DAY_01"].ToString()), 2),
-                                DAY_02 = Math.Round(Convert.ToDouble(row["DAY_02"].ToString()), 2),
-                                DAY_03 = Math.Round(Convert.ToDouble(row["DAY_03"].ToString()), 2),
-                                DAY_04 = Math.Round(Convert.ToDouble(row["DAY_04"].ToString()), 2),
-                                DAY_05 = Math.Round(Convert.ToDouble(row["DAY_05"].ToString()), 2),
-                                DAY_06 = Math.Round(Convert.ToDouble(row["DAY_06"].ToString()), 2),
-                                DAY_07 = Math.Round(Convert.ToDouble(row["DAY_07"].ToString()), 2),
-                                DAY_08 = Math.Round(Convert.ToDouble(row["DAY_08"].ToString()), 2),
-                                DAY_09 = Math.Round(Convert.ToDouble(row["DAY_09"].ToString()), 2),
-                                DAY_10 = Math.Round(Convert.ToDouble(row["DAY_10"].ToString()), 2),
-                                DAY_11 = Math.Round(Convert.ToDouble(row["DAY_11"].ToString()), 2),
-                                DAY_12 = Math.Round(Convert.ToDouble(row["DAY_12"].ToString()), 2),
-                                DAY_13 = Math.Round(Convert.ToDouble(row["DAY_13"].ToString()), 2),
-                                DAY_14 = Math.Round(Convert.ToDouble(row["DAY_14"].ToString()), 2),
-                                DAY_15 = Math.Round(Convert.ToDouble(row["DAY_15"].ToString()), 2),
-                                DAY_16 = Math.Round(Convert.ToDouble(row["DAY_16"].ToString()), 2),
-                                DAY_17 = Math.Round(Convert.ToDouble(row["DAY_17"].ToString()), 2),
-                                DAY_18 = Math.Round(Convert.ToDouble(row["DAY_18"].ToString()), 2),
-                                DAY_19 = Math.Round(Convert.ToDouble(row["DAY_19"].ToString()), 2),
-                                DAY_20 = Math.Round(Convert.ToDouble(row["DAY_20"].ToString()), 2),
-                                DAY_21 = Math.Round(Convert.ToDouble(row["DAY_21"].ToString()), 2),
-                                DAY_22 = Math.Round(Convert.ToDouble(row["DAY_22"].ToString()), 2),
-                                DAY_23 = Math.Round(Convert.ToDouble(row["DAY_23"].ToString()), 2),
-                                DAY_24 = Math.Round(Convert.ToDouble(row["DAY_24"].ToString()), 2),
-                                DAY_25 = Math.Round(Convert.ToDouble(row["DAY_25"].ToString()), 2),
-                                DAY_26 = Math.Round(Convert.ToDouble(row["DAY_26"].ToString()), 2),
-                                DAY_27 = Math.Round(Convert.ToDouble(row["DAY_27"].ToString()), 2),
-                                DAY_28 = Math.Round(Convert.ToDouble(row["DAY_28"].ToString()), 2),
-                                DAY_29 = Math.Round(Convert.ToDouble(row["DAY_29"].ToString()), 2),
-                                DAY_30 = Math.Round(Convert.ToDouble(row["DAY_30"].ToString()), 2),
-                                DAY_31 = Math.Round(Convert.ToDouble(row["DAY_31"].ToString()), 2)
-                            })).ToList<DayWiseModel>();
-
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("Error: {0}", e.Message);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine((object)ex);
-                return new List<DayWiseModel>();
-            }
-            return dayWiseModelList;
-        }
-        public List<DayWiseModel> GetIMSValue(int UserId)
-        {
-            List<DayWiseModel> dayWiseModelList = new List<DayWiseModel>();
-            try
-            {
-                using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
-                {
-                    using (OracleCommand oracleCommand = new OracleCommand())
-                    {
-                        //oracleCommand.Connection = oracleConnection;
-                        //oracleCommand.CommandText = "FN_DAY_WISE_SALES";
-                        //oracleCommand.CommandType = CommandType.StoredProcedure;
-                        //oracleCommand.Parameters.Add("pUserId", OracleDbType.Int32).Value = (object)UserId;
-
-                        //oracleCommand.Parameters.Add("return_value", OracleDbType.RefCursor, ParameterDirection.InputOutput);
-                        //oracleConnection.Open();
-                        //oracleCommand.ExecuteNonQuery();
-                        //OracleDataReader reader = oracleCommand.ExecuteReader();
-                        //DataTable dataTable = new DataTable();
-                        //if (reader.HasRows)
-                        //    dataTable.Load((IDataReader)reader);
-
-
-                        string anonymous_block = "begin " +
-                              "  :refcursor1 := FN_DAY_WISE_SALES("+ UserId + ") ;" +
-                              "end;";
-                        //fill in your function and variables via the above example
-                        OracleCommand sqlCom = oracleConnection.CreateCommand();
-                        sqlCom.CommandText = anonymous_block;
-
-                        // Bind 
-                        sqlCom.Parameters.Add("refcursor1", OracleDbType.RefCursor);
-                        sqlCom.Parameters[0].Direction = ParameterDirection.ReturnValue;
-
-                        try
-                        {
-                            // Execute command; Have the parameters populated
-                            oracleConnection.Open();
-                            sqlCom.ExecuteNonQuery();
-
-                       
-                            DataTable dataTable = new DataTable();
-                        
-
-                            OracleDataAdapter da = new OracleDataAdapter(sqlCom);
-
-                            // Populate a DataSet with refcursor1.
-                            DataSet ds = new DataSet();
-                            da.Fill(ds, "refcursor1", (OracleRefCursor)(sqlCom.Parameters["refcursor1"].Value));
-                            dataTable = ds.Tables["refcursor1"];
-                            // Print out the field count the REF Cursor
-                       
-                        
-
-                            dayWiseModelList = dataTable.Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
+                            OracleDataAdapter oracleDataAdapter = new OracleDataAdapter(command);
+                            DataSet dataSet = new DataSet();
+                            oracleDataAdapter.Fill(dataSet, "refcursor1", (OracleRefCursor)command.Parameters["refcursor1"].Value);
+                            transitStockList = dataSet.Tables["refcursor1"].Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
                             {
                                 YYYYMMMM = Convert.ToInt32(row["YYYYMM"].ToString()),
                                 DAY_01 = Math.Round(Convert.ToDouble(row["DAY_01"].ToString()) / 10000000.0, 2),
@@ -733,30 +489,166 @@ namespace DashboardAPI.Model.DAL
                                 DAY_30 = Math.Round(Convert.ToDouble(row["DAY_30"].ToString()) / 10000000.0, 2),
                                 DAY_31 = Math.Round(Convert.ToDouble(row["DAY_31"].ToString()) / 10000000.0, 2)
                             })).ToList<DayWiseModel>();
-
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("Error: {0}", e.Message);
+                            Console.WriteLine("Error: {0}", (object)ex.Message);
                         }
-
-                        
-                    
                     }
                 }
-
+                return transitStockList;
             }
             catch (Exception ex)
             {
-                dayWiseModelList = new List<DayWiseModel>();
+                Console.WriteLine((object)ex);
+                return new List<DayWiseModel>();
             }
-
-
-            return dayWiseModelList;
         }
 
+        public List<DayWiseModel> GetIMSVolumeList(int UserId)
+        {
+            List<DayWiseModel> imsVolumeList = new List<DayWiseModel>();
+            try
+            {
+                using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
+                {
+                    using (new OracleCommand())
+                    {
+                        string str = "begin   :refcursor1 := FN_NATIONAL_DAY_WISE_IMS_VOL(" + UserId.ToString() + ") ;end;";
+                        OracleCommand command = oracleConnection.CreateCommand();
+                        command.CommandText = str;
+                        command.Parameters.Add("refcursor1", OracleDbType.RefCursor);
+                        command.Parameters[0].Direction = ParameterDirection.ReturnValue;
+                        try
+                        {
+                            oracleConnection.Open();
+                            command.ExecuteNonQuery();
+                            DataTable dataTable = new DataTable();
+                            OracleDataAdapter oracleDataAdapter = new OracleDataAdapter(command);
+                            DataSet dataSet = new DataSet();
+                            oracleDataAdapter.Fill(dataSet, "refcursor1", (OracleRefCursor)command.Parameters["refcursor1"].Value);
+                            imsVolumeList = dataSet.Tables["refcursor1"].Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
+                            {
+                                YYYYMMMM = Convert.ToInt32(row["YYYYMM"].ToString()),
+                                DAY_01 = Math.Round(Convert.ToDouble(row["DAY_01"].ToString()), 2),
+                                DAY_02 = Math.Round(Convert.ToDouble(row["DAY_02"].ToString()), 2),
+                                DAY_03 = Math.Round(Convert.ToDouble(row["DAY_03"].ToString()), 2),
+                                DAY_04 = Math.Round(Convert.ToDouble(row["DAY_04"].ToString()), 2),
+                                DAY_05 = Math.Round(Convert.ToDouble(row["DAY_05"].ToString()), 2),
+                                DAY_06 = Math.Round(Convert.ToDouble(row["DAY_06"].ToString()), 2),
+                                DAY_07 = Math.Round(Convert.ToDouble(row["DAY_07"].ToString()), 2),
+                                DAY_08 = Math.Round(Convert.ToDouble(row["DAY_08"].ToString()), 2),
+                                DAY_09 = Math.Round(Convert.ToDouble(row["DAY_09"].ToString()), 2),
+                                DAY_10 = Math.Round(Convert.ToDouble(row["DAY_10"].ToString()), 2),
+                                DAY_11 = Math.Round(Convert.ToDouble(row["DAY_11"].ToString()), 2),
+                                DAY_12 = Math.Round(Convert.ToDouble(row["DAY_12"].ToString()), 2),
+                                DAY_13 = Math.Round(Convert.ToDouble(row["DAY_13"].ToString()), 2),
+                                DAY_14 = Math.Round(Convert.ToDouble(row["DAY_14"].ToString()), 2),
+                                DAY_15 = Math.Round(Convert.ToDouble(row["DAY_15"].ToString()), 2),
+                                DAY_16 = Math.Round(Convert.ToDouble(row["DAY_16"].ToString()), 2),
+                                DAY_17 = Math.Round(Convert.ToDouble(row["DAY_17"].ToString()), 2),
+                                DAY_18 = Math.Round(Convert.ToDouble(row["DAY_18"].ToString()), 2),
+                                DAY_19 = Math.Round(Convert.ToDouble(row["DAY_19"].ToString()), 2),
+                                DAY_20 = Math.Round(Convert.ToDouble(row["DAY_20"].ToString()), 2),
+                                DAY_21 = Math.Round(Convert.ToDouble(row["DAY_21"].ToString()), 2),
+                                DAY_22 = Math.Round(Convert.ToDouble(row["DAY_22"].ToString()), 2),
+                                DAY_23 = Math.Round(Convert.ToDouble(row["DAY_23"].ToString()), 2),
+                                DAY_24 = Math.Round(Convert.ToDouble(row["DAY_24"].ToString()), 2),
+                                DAY_25 = Math.Round(Convert.ToDouble(row["DAY_25"].ToString()), 2),
+                                DAY_26 = Math.Round(Convert.ToDouble(row["DAY_26"].ToString()), 2),
+                                DAY_27 = Math.Round(Convert.ToDouble(row["DAY_27"].ToString()), 2),
+                                DAY_28 = Math.Round(Convert.ToDouble(row["DAY_28"].ToString()), 2),
+                                DAY_29 = Math.Round(Convert.ToDouble(row["DAY_29"].ToString()), 2),
+                                DAY_30 = Math.Round(Convert.ToDouble(row["DAY_30"].ToString()), 2),
+                                DAY_31 = Math.Round(Convert.ToDouble(row["DAY_31"].ToString()), 2)
+                            })).ToList<DayWiseModel>();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error: {0}", (object)ex.Message);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine((object)ex);
+                return new List<DayWiseModel>();
+            }
+            return imsVolumeList;
+        }
 
-    
+        public List<DayWiseModel> GetIMSValue(int UserId)
+        {
+            List<DayWiseModel> imsValue = new List<DayWiseModel>();
+            try
+            {
+                using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
+                {
+                    using (new OracleCommand())
+                    {
+                        string str = "begin   :refcursor1 := FN_DAY_WISE_SALES(" + UserId.ToString() + ") ;end;";
+                        OracleCommand command = oracleConnection.CreateCommand();
+                        command.CommandText = str;
+                        command.Parameters.Add("refcursor1", OracleDbType.RefCursor);
+                        command.Parameters[0].Direction = ParameterDirection.ReturnValue;
+                        try
+                        {
+                            oracleConnection.Open();
+                            command.ExecuteNonQuery();
+                            DataTable dataTable = new DataTable();
+                            OracleDataAdapter oracleDataAdapter = new OracleDataAdapter(command);
+                            DataSet dataSet = new DataSet();
+                            oracleDataAdapter.Fill(dataSet, "refcursor1", (OracleRefCursor)command.Parameters["refcursor1"].Value);
+                            imsValue = dataSet.Tables["refcursor1"].Rows.Cast<DataRow>().Select<DataRow, DayWiseModel>((Func<DataRow, DayWiseModel>)(row => new DayWiseModel()
+                            {
+                                YYYYMMMM = Convert.ToInt32(row["YYYYMM"].ToString()),
+                                DAY_01 = Math.Round(Convert.ToDouble(row["DAY_01"].ToString()) / 10000000.0, 2),
+                                DAY_02 = Math.Round(Convert.ToDouble(row["DAY_02"].ToString()) / 10000000.0, 2),
+                                DAY_03 = Math.Round(Convert.ToDouble(row["DAY_03"].ToString()) / 10000000.0, 2),
+                                DAY_04 = Math.Round(Convert.ToDouble(row["DAY_04"].ToString()) / 10000000.0, 2),
+                                DAY_05 = Math.Round(Convert.ToDouble(row["DAY_05"].ToString()) / 10000000.0, 2),
+                                DAY_06 = Math.Round(Convert.ToDouble(row["DAY_06"].ToString()) / 10000000.0, 2),
+                                DAY_07 = Math.Round(Convert.ToDouble(row["DAY_07"].ToString()) / 10000000.0, 2),
+                                DAY_08 = Math.Round(Convert.ToDouble(row["DAY_08"].ToString()) / 10000000.0, 2),
+                                DAY_09 = Math.Round(Convert.ToDouble(row["DAY_09"].ToString()) / 10000000.0, 2),
+                                DAY_10 = Math.Round(Convert.ToDouble(row["DAY_10"].ToString()) / 10000000.0, 2),
+                                DAY_11 = Math.Round(Convert.ToDouble(row["DAY_11"].ToString()) / 10000000.0, 2),
+                                DAY_12 = Math.Round(Convert.ToDouble(row["DAY_12"].ToString()) / 10000000.0, 2),
+                                DAY_13 = Math.Round(Convert.ToDouble(row["DAY_13"].ToString()) / 10000000.0, 2),
+                                DAY_14 = Math.Round(Convert.ToDouble(row["DAY_14"].ToString()) / 10000000.0, 2),
+                                DAY_15 = Math.Round(Convert.ToDouble(row["DAY_15"].ToString()) / 10000000.0, 2),
+                                DAY_16 = Math.Round(Convert.ToDouble(row["DAY_16"].ToString()) / 10000000.0, 2),
+                                DAY_17 = Math.Round(Convert.ToDouble(row["DAY_17"].ToString()) / 10000000.0, 2),
+                                DAY_18 = Math.Round(Convert.ToDouble(row["DAY_18"].ToString()) / 10000000.0, 2),
+                                DAY_19 = Math.Round(Convert.ToDouble(row["DAY_19"].ToString()) / 10000000.0, 2),
+                                DAY_20 = Math.Round(Convert.ToDouble(row["DAY_20"].ToString()) / 10000000.0, 2),
+                                DAY_21 = Math.Round(Convert.ToDouble(row["DAY_21"].ToString()) / 10000000.0, 2),
+                                DAY_22 = Math.Round(Convert.ToDouble(row["DAY_22"].ToString()) / 10000000.0, 2),
+                                DAY_23 = Math.Round(Convert.ToDouble(row["DAY_23"].ToString()) / 10000000.0, 2),
+                                DAY_24 = Math.Round(Convert.ToDouble(row["DAY_24"].ToString()) / 10000000.0, 2),
+                                DAY_25 = Math.Round(Convert.ToDouble(row["DAY_25"].ToString()) / 10000000.0, 2),
+                                DAY_26 = Math.Round(Convert.ToDouble(row["DAY_26"].ToString()) / 10000000.0, 2),
+                                DAY_27 = Math.Round(Convert.ToDouble(row["DAY_27"].ToString()) / 10000000.0, 2),
+                                DAY_28 = Math.Round(Convert.ToDouble(row["DAY_28"].ToString()) / 10000000.0, 2),
+                                DAY_29 = Math.Round(Convert.ToDouble(row["DAY_29"].ToString()) / 10000000.0, 2),
+                                DAY_30 = Math.Round(Convert.ToDouble(row["DAY_30"].ToString()) / 10000000.0, 2),
+                                DAY_31 = Math.Round(Convert.ToDouble(row["DAY_31"].ToString()) / 10000000.0, 2)
+                            })).ToList<DayWiseModel>();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error: {0}", (object)ex.Message);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                imsValue = new List<DayWiseModel>();
+            }
+            return imsValue;
+        }
 
         public List<LastFiveYearSalesModel> GetfiveYearsSaleTrend()
         {
@@ -773,44 +665,27 @@ namespace DashboardAPI.Model.DAL
 
         public TargetSalesModel GetTargetSalesList(int UserId, string Year)
         {
-            TargetSalesModel targetSalesModel = new TargetSalesModel();
+            TargetSalesModel targetSalesList = new TargetSalesModel();
             try
             {
                 using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
                 {
-                    using (OracleCommand oracleCommand = new OracleCommand())
+                    using (new OracleCommand())
                     {
-                        string anonymous_block = String.Format("begin " +
-                             "  :refcursor1 := FN_MONTH_WISE_TAR_SAL_ACH_CY({0},{1}) ;" +
-                             "end;",UserId,Year);
-                        //fill in your function and variables via the above example
-                        OracleCommand sqlCom = oracleConnection.CreateCommand();
-                        sqlCom.CommandText = anonymous_block;
-
-                        // Bind 
-                        sqlCom.Parameters.Add("refcursor1", OracleDbType.RefCursor);
-                        sqlCom.Parameters[0].Direction = ParameterDirection.ReturnValue;
+                        string str = string.Format("begin   :refcursor1 := FN_MONTH_WISE_TAR_SAL_ACH_CY({0},{1}) ;end;", (object)UserId, (object)Year);
+                        OracleCommand command = oracleConnection.CreateCommand();
+                        command.CommandText = str;
+                        command.Parameters.Add("refcursor1", OracleDbType.RefCursor);
+                        command.Parameters[0].Direction = ParameterDirection.ReturnValue;
                         try
                         {
-                            // Execute command; Have the parameters populated
                             oracleConnection.Open();
-                            sqlCom.ExecuteNonQuery();
-
-
+                            command.ExecuteNonQuery();
                             DataTable dataTable = new DataTable();
-
-
-                            OracleDataAdapter da = new OracleDataAdapter(sqlCom);
-
-                            // Populate a DataSet with refcursor1.
-                            DataSet ds = new DataSet();
-                            da.Fill(ds, "refcursor1", (OracleRefCursor)(sqlCom.Parameters["refcursor1"].Value));
-                            dataTable = ds.Tables["refcursor1"];
-                            // Print out the field count the REF Cursor
-
-
-
-                            targetSalesModel = dataTable.Rows.Cast<DataRow>().Select<DataRow, TargetSalesModel>((Func<DataRow, TargetSalesModel>)(row => new TargetSalesModel()
+                            OracleDataAdapter oracleDataAdapter = new OracleDataAdapter(command);
+                            DataSet dataSet = new DataSet();
+                            oracleDataAdapter.Fill(dataSet, "refcursor1", (OracleRefCursor)command.Parameters["refcursor1"].Value);
+                            targetSalesList = dataSet.Tables["refcursor1"].Rows.Cast<DataRow>().Select<DataRow, TargetSalesModel>((Func<DataRow, TargetSalesModel>)(row => new TargetSalesModel()
                             {
                                 JAN_ACH = Math.Round(Convert.ToDouble(row["JAN_ACH"].ToString()), 2),
                                 JAN_IMS_VAL = Math.Round(Convert.ToDouble(row["JAN_IMS_VAL"].ToString()) / 10000000.0, 2),
@@ -848,14 +723,12 @@ namespace DashboardAPI.Model.DAL
                                 DEC_ACH = Math.Round(Convert.ToDouble(row["DEC_ACH"].ToString()), 2),
                                 DEC_IMS_VAL = Math.Round(Convert.ToDouble(row["DEC_IMS_VAL"].ToString()) / 10000000.0, 2),
                                 DEC_TARGET_VAL = Math.Round(Convert.ToDouble(row["DEC_TARGET_VAL"].ToString()) / 10000000.0, 2)
-                            })).ToList<TargetSalesModel>().FirstOrDefault<TargetSalesModel>(); ;
-
+                            })).ToList<TargetSalesModel>().FirstOrDefault<TargetSalesModel>();
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("Error: {0}", e.Message);
+                            Console.WriteLine("Error: {0}", (object)ex.Message);
                         }
-
                     }
                 }
             }
@@ -864,49 +737,32 @@ namespace DashboardAPI.Model.DAL
                 Console.WriteLine((object)ex);
                 return new TargetSalesModel();
             }
-
-            return targetSalesModel;
+            return targetSalesList;
         }
+
         public TargetSalesModel GetTargetSalesListLastYear(int UserId, string Year)
         {
-            TargetSalesModel targetSalesModel = new TargetSalesModel();
+            TargetSalesModel salesListLastYear = new TargetSalesModel();
             try
             {
                 using (OracleConnection oracleConnection = new OracleConnection(this.ConnString))
                 {
-                    using (OracleCommand oracleCommand = new OracleCommand())
+                    using (new OracleCommand())
                     {
-                        string anonymous_block = String.Format("begin " +
-                             "  :refcursor1 := FN_MONTH_WISE_TAR_SAL_ACH_LY({0},{1}) ;" +
-                             "end;", UserId, Year);
-                        //fill in your function and variables via the above example
-                        OracleCommand sqlCom = oracleConnection.CreateCommand();
-                        sqlCom.CommandText = anonymous_block;
-
-                        // Bind 
-                        sqlCom.Parameters.Add("refcursor1", OracleDbType.RefCursor);
-                        sqlCom.Parameters[0].Direction = ParameterDirection.ReturnValue;
+                        string str = string.Format("begin   :refcursor1 := FN_MONTH_WISE_TAR_SAL_ACH_LY({0},{1}) ;end;", (object)UserId, (object)Year);
+                        OracleCommand command = oracleConnection.CreateCommand();
+                        command.CommandText = str;
+                        command.Parameters.Add("refcursor1", OracleDbType.RefCursor);
+                        command.Parameters[0].Direction = ParameterDirection.ReturnValue;
                         try
                         {
-                            // Execute command; Have the parameters populated
                             oracleConnection.Open();
-                            sqlCom.ExecuteNonQuery();
-
-
+                            command.ExecuteNonQuery();
                             DataTable dataTable = new DataTable();
-
-
-                            OracleDataAdapter da = new OracleDataAdapter(sqlCom);
-
-                            // Populate a DataSet with refcursor1.
-                            DataSet ds = new DataSet();
-                            da.Fill(ds, "refcursor1", (OracleRefCursor)(sqlCom.Parameters["refcursor1"].Value));
-                            dataTable = ds.Tables["refcursor1"];
-                            // Print out the field count the REF Cursor
-
-
-
-                            targetSalesModel = dataTable.Rows.Cast<DataRow>().Select<DataRow, TargetSalesModel>((Func<DataRow, TargetSalesModel>)(row => new TargetSalesModel()
+                            OracleDataAdapter oracleDataAdapter = new OracleDataAdapter(command);
+                            DataSet dataSet = new DataSet();
+                            oracleDataAdapter.Fill(dataSet, "refcursor1", (OracleRefCursor)command.Parameters["refcursor1"].Value);
+                            salesListLastYear = dataSet.Tables["refcursor1"].Rows.Cast<DataRow>().Select<DataRow, TargetSalesModel>((Func<DataRow, TargetSalesModel>)(row => new TargetSalesModel()
                             {
                                 JAN_ACH = Math.Round(Convert.ToDouble(row["JAN_ACH"].ToString()), 2),
                                 JAN_IMS_VAL = Math.Round(Convert.ToDouble(row["JAN_IMS_VAL"].ToString()) / 10000000.0, 2),
@@ -944,14 +800,12 @@ namespace DashboardAPI.Model.DAL
                                 DEC_ACH = Math.Round(Convert.ToDouble(row["DEC_ACH"].ToString()), 2),
                                 DEC_IMS_VAL = Math.Round(Convert.ToDouble(row["DEC_IMS_VAL"].ToString()) / 10000000.0, 2),
                                 DEC_TARGET_VAL = Math.Round(Convert.ToDouble(row["DEC_TARGET_VAL"].ToString()) / 10000000.0, 2)
-                            })).ToList<TargetSalesModel>().FirstOrDefault<TargetSalesModel>(); ;
-
+                            })).ToList<TargetSalesModel>().FirstOrDefault<TargetSalesModel>();
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("Error: {0}", e.Message);
+                            Console.WriteLine("Error: {0}", (object)ex.Message);
                         }
-
                     }
                 }
             }
@@ -960,10 +814,8 @@ namespace DashboardAPI.Model.DAL
                 Console.WriteLine((object)ex);
                 return new TargetSalesModel();
             }
-
-            return targetSalesModel;
+            return salesListLastYear;
         }
-  
 
         public List<SalesWiseModel> GetProductWiseSales()
         {
@@ -971,11 +823,7 @@ namespace DashboardAPI.Model.DAL
             List<SalesWiseModel> salesWiseModelList = new List<SalesWiseModel>();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, SalesWiseModel>((Func<DataRow, SalesWiseModel>)(row => new SalesWiseModel()
             {
-                PRODUCT_CODE = row["PRODUCT_CODE"].ToString(),
                 PRODUCT_NAME = row["PRODUCT_NAME"].ToString(),
-                IMS_VALUE = row["IMS_VALUE"].ToString() != "" ? Convert.ToDouble(row["IMS_VALUE"].ToString()) : 0.0,
-                RETURN_VALUE = row["RETURN_VALUE"].ToString() != "" ? Convert.ToDouble(row["RETURN_VALUE"].ToString()) : 0.0,
-                SALES_VALUE = row["SALES_VALUE"].ToString() != "" ? Convert.ToDouble(row["SALES_VALUE"].ToString()) : 0.0,
                 PCT_OF_TOTAL_IMS_VALUE = row["PCT_OF_TOTAL_IMS_VALUE"].ToString() != "" ? Convert.ToDouble(row["PCT_OF_TOTAL_IMS_VALUE"].ToString()) : 0.0,
                 IMS_VALUE_CORE = row["IMS_VALUE_CORE"].ToString() != "" ? Convert.ToDouble(row["IMS_VALUE_CORE"].ToString()) : 0.0
             })).ToList<SalesWiseModel>();
@@ -987,29 +835,114 @@ namespace DashboardAPI.Model.DAL
             List<SalesWiseModel> salesWiseModelList = new List<SalesWiseModel>();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, SalesWiseModel>((Func<DataRow, SalesWiseModel>)(row => new SalesWiseModel()
             {
-                CATEGORY_CODE = row["CATEGORY_CODE"].ToString(),
                 CATEGORY_NAME = row["CATEGORY_NAME"].ToString(),
-                IMS_VALUE = row["IMS_VALUE"].ToString() != "" ? Convert.ToDouble(row["IMS_VALUE"].ToString()) : 0.0,
-                RETURN_VALUE = row["RETURN_VALUE"].ToString() != "" ? Convert.ToDouble(row["RETURN_VALUE"].ToString()) : 0.0,
-                SALES_VALUE = row["SALES_VALUE"].ToString() != "" ? Convert.ToDouble(row["SALES_VALUE"].ToString()) : 0.0,
                 PCT_OF_TOTAL_IMS_VALUE = row["PCT_OF_TOTAL_IMS_VALUE"].ToString() != "" ? Convert.ToDouble(row["PCT_OF_TOTAL_IMS_VALUE"].ToString()) : 0.0,
                 IMS_VALUE_CORE = row["IMS_VALUE_CORE"].ToString() != "" ? Convert.ToDouble(row["IMS_VALUE_CORE"].ToString()) : 0.0
             })).ToList<SalesWiseModel>();
         }
+
         public List<SalesWiseModel> GetBrandWiseSales()
         {
-            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select * from MV_Brand_WISE_SALES"));
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select * from MV_BRAND_MTD_ACH_GROWTH_TON"));
             List<SalesWiseModel> salesWiseModelList = new List<SalesWiseModel>();
             return dataTable.Rows.Cast<DataRow>().Select<DataRow, SalesWiseModel>((Func<DataRow, SalesWiseModel>)(row => new SalesWiseModel()
             {
-                BRAND_CODE = row["BRAND_CODE"].ToString(),
                 BRAND_NAME = row["BRAND_NAME"].ToString(),
-                IMS_VALUE = row["IMS_VALUE"].ToString() != "" ? Convert.ToDouble(row["IMS_VALUE"].ToString()) : 0.0,
-                RETURN_VALUE = row["RETURN_VALUE"].ToString() != "" ? Convert.ToDouble(row["RETURN_VALUE"].ToString()) : 0.0,
-                SALES_VALUE = row["SALES_VALUE"].ToString() != "" ? Convert.ToDouble(row["SALES_VALUE"].ToString()) : 0.0,
                 PCT_OF_TOTAL_IMS_VALUE = row["PCT_OF_TOTAL_IMS_VALUE"].ToString() != "" ? Convert.ToDouble(row["PCT_OF_TOTAL_IMS_VALUE"].ToString()) : 0.0,
                 IMS_VALUE_CORE = row["IMS_VALUE_CORE"].ToString() != "" ? Convert.ToDouble(row["IMS_VALUE_CORE"].ToString()) : 0.0
             })).ToList<SalesWiseModel>();
+        }
+
+        public List<BrandSalesMtd> GetMonthlyBrandSales()
+        {
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select * from MV_BRAND_MTD_ACH_GROWTH_TON"));
+            List<BrandSalesMtd> brandSalesMtdList = new List<BrandSalesMtd>();
+            return dataTable.Rows.Cast<DataRow>().Select<DataRow, BrandSalesMtd>((Func<DataRow, BrandSalesMtd>)(row => new BrandSalesMtd()
+            {
+                BRAND_NAME = row["BRAND_NAME"].ToString(),
+                BRAND_CODE = row["BRAND_CODE"].ToString(),
+                CY_MTD_TARGET_WEIGHT = row["CY_MTD_TARGET_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_MTD_TARGET_WEIGHT"].ToString()) : 0.0,
+                CY_MTD_WEIGHT = row["CY_MTD_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_MTD_WEIGHT"].ToString()) : 0.0,
+                LY_MTD_WET = row["LY_MTD_WET"].ToString() != "" ? Convert.ToDouble(row["LY_MTD_WET"].ToString()) : 0.0,
+                ACH = row["ACH"].ToString() != "" ? Convert.ToDouble(row["ACH"].ToString()) : 0.0,
+                GROWTH = row["GROWTH"].ToString() != "" ? Convert.ToDouble(row["GROWTH"].ToString()) : 0.0
+            })).ToList<BrandSalesMtd>();
+        }
+
+        public List<BrandSalesYtd> GetYearlyBrandSales()
+        {
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select * from MV_BRAND_YTD_ACH_GROWTH_TON"));
+            List<BrandSalesYtd> brandSalesYtdList = new List<BrandSalesYtd>();
+            return dataTable.Rows.Cast<DataRow>().Select<DataRow, BrandSalesYtd>((Func<DataRow, BrandSalesYtd>)(row => new BrandSalesYtd()
+            {
+                BRAND_NAME = row["BRAND_NAME"].ToString(),
+                BRAND_CODE = row["BRAND_CODE"].ToString(),
+                CY_YTD_TARGET_WEIGHT = row["CY_YTD_TARGET_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_YTD_TARGET_WEIGHT"].ToString()) : 0.0,
+                CY_YTD_WEIGHT = row["CY_YTD_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_YTD_WEIGHT"].ToString()) : 0.0,
+                LY_YTD_WET = row["LY_YTD_WET"].ToString() != "" ? Convert.ToDouble(row["LY_YTD_WET"].ToString()) : 0.0,
+                ACH = row["ACH"].ToString() != "" ? Convert.ToDouble(row["ACH"].ToString()) : 0.0,
+                GROWTH = row["GROWTH"].ToString() != "" ? Convert.ToDouble(row["GROWTH"].ToString()) : 0.0
+            })).ToList<BrandSalesYtd>();
+        }
+
+        public List<CategorySalesMtd> GetMonthlyCategorySales()
+        {
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select * from MV_CATEGORY_MTD_ACH_GROWTH_TON"));
+            List<CategorySalesMtd> categorySalesMtdList = new List<CategorySalesMtd>();
+            return dataTable.Rows.Cast<DataRow>().Select<DataRow, CategorySalesMtd>((Func<DataRow, CategorySalesMtd>)(row => new CategorySalesMtd()
+            {
+                Category_NAME = row["Category_NAME"].ToString(),
+                Category_CODE = row["Category_CODE"].ToString(),
+                CY_MTD_TARGET_WEIGHT = row["CY_MTD_TARGET_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_MTD_TARGET_WEIGHT"].ToString()) : 0.0,
+                CY_MTD_WEIGHT = row["CY_MTD_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_MTD_WEIGHT"].ToString()) : 0.0,
+                LY_MTD_WET = row["LY_MTD_WET"].ToString() != "" ? Convert.ToDouble(row["LY_MTD_WET"].ToString()) : 0.0,
+                ACH = row["ACH"].ToString() != "" ? Convert.ToDouble(row["ACH"].ToString()) : 0.0,
+                GROWTH = row["GROWTH"].ToString() != "" ? Convert.ToDouble(row["GROWTH"].ToString()) : 0.0
+            })).ToList<CategorySalesMtd>();
+        }
+
+        public List<CategorySalesYtd> GetYearlyCategorySales()
+        {
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select * from MV_CATEGORY_YTD_ACH_GROWTH_TON"));
+            List<CategorySalesYtd> categorySalesYtdList = new List<CategorySalesYtd>();
+            return dataTable.Rows.Cast<DataRow>().Select<DataRow, CategorySalesYtd>((Func<DataRow, CategorySalesYtd>)(row => new CategorySalesYtd()
+            {
+                Category_NAME = row["Category_NAME"].ToString(),
+                Category_CODE = row["Category_CODE"].ToString(),
+                CY_YTD_TARGET_WEIGHT = row["CY_YTD_TARGET_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_YTD_TARGET_WEIGHT"].ToString()) : 0.0,
+                CY_YTD_WEIGHT = row["CY_YTD_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_YTD_WEIGHT"].ToString()) : 0.0,
+                LY_YTD_WET = row["LY_YTD_WET"].ToString() != "" ? Convert.ToDouble(row["LY_YTD_WET"].ToString()) : 0.0,
+                ACH = row["ACH"].ToString() != "" ? Convert.ToDouble(row["ACH"].ToString()) : 0.0,
+                GROWTH = row["GROWTH"].ToString() != "" ? Convert.ToDouble(row["GROWTH"].ToString()) : 0.0
+            })).ToList<CategorySalesYtd>();
+        }
+
+        public List<NationalSalesMtd> GetNationalSalesMtd()
+        {
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select * from MV_NATIONAL_MTD_ACH_GROWTH_TON"));
+            List<NationalSalesMtd> nationalSalesMtdList = new List<NationalSalesMtd>();
+            return dataTable.Rows.Cast<DataRow>().Select<DataRow, NationalSalesMtd>((Func<DataRow, NationalSalesMtd>)(row => new NationalSalesMtd()
+            {
+                CY_MTD_TARGET_WEIGHT = row["CY_MTD_TARGET_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_MTD_TARGET_WEIGHT"].ToString()) : 0.0,
+                CY_MTD_WEIGHT = row["CY_MTD_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_MTD_WEIGHT"].ToString()) : 0.0,
+                LY_MTD_WET = row["LY_MTD_WET"].ToString() != "" ? Convert.ToDouble(row["LY_MTD_WET"].ToString()) : 0.0,
+                ACH = row["ACH"].ToString() != "" ? Convert.ToDouble(row["ACH"].ToString()) : 0.0,
+                GROWTH = row["GROWTH"].ToString() != "" ? Convert.ToDouble(row["GROWTH"].ToString()) : 0.0
+            })).ToList<NationalSalesMtd>();
+        }
+
+        public List<NationalSalesYtd> GetNationalSalesYtd()
+        {
+            DataTable dataTable = this._dbHelper.GetDataTable(string.Format("select * from MV_NATIONAL_YTD_ACH_GROWTH_TON"));
+            List<NationalSalesYtd> nationalSalesYtdList = new List<NationalSalesYtd>();
+            return dataTable.Rows.Cast<DataRow>().Select<DataRow, NationalSalesYtd>((Func<DataRow, NationalSalesYtd>)(row => new NationalSalesYtd()
+            {
+                CY_YTD_TARGET_WEIGHT = row["CY_YTD_TARGET_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_YTD_TARGET_WEIGHT"].ToString()) : 0.0,
+                CY_YTD_WEIGHT = row["CY_YTD_WEIGHT"].ToString() != "" ? Convert.ToDouble(row["CY_YTD_WEIGHT"].ToString()) : 0.0,
+                LY_YTD_WET = row["LY_YTD_WET"].ToString() != "" ? Convert.ToDouble(row["LY_YTD_WET"].ToString()) : 0.0,
+                ACH = row["ACH"].ToString() != "" ? Convert.ToDouble(row["ACH"].ToString()) : 0.0,
+                GROWTH = row["GROWTH"].ToString() != "" ? Convert.ToDouble(row["GROWTH"].ToString()) : 0.0
+            })).ToList<NationalSalesYtd>();
         }
     }
 }
